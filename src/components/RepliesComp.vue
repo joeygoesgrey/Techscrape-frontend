@@ -5,12 +5,14 @@ import { getRepliesByCommentId, API_BASE_URL } from '../utils';
 import moment from 'moment';
 import DeleteForm from './DeleteForm.vue';
 import ReplyForm from './ReplyForm.vue';
+// import LoadingComp from './LoadingComp.vue';
 
 export default {
     name: "RepliesComponent",
     components: {
         DeleteForm,
-        ReplyForm
+        ReplyForm,
+        // LoadingComp
     },
     props: {
         comment_id: {
@@ -36,6 +38,7 @@ export default {
                 if (response) {
                     replies.value = response.replies || [];
                 }
+                // store.commit('SET_LOADING');
             } catch (error) {
                 console.error(error);
             }
@@ -53,7 +56,6 @@ export default {
         // Function to toggle the visibility of replies
         const toggleShowReplies = (replyId) => {
             store.commit('TOGGLE_SHOW_REPLIES', replyId);
-            console.log(showRepliesFor)
         };
 
         return {
@@ -72,6 +74,7 @@ export default {
 }
 </script>
 <template>
+  
     <div v-for="(reply, replyIndex) in replies" :key="reply.id">
         <!-- <div v-if=""> -->
         <article class="p-6 mb-3 mt-2 sm:ml-4 md:ml-12 text-base bg-white rounded-lg dark:bg-gray-900">

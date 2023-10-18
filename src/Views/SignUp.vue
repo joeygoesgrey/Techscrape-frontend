@@ -1,20 +1,13 @@
 <template>
-    <section class="">
-        <!-- <div class="relative flex items-start pt-12 pb-56 m-4 overflow-hidden bg-center bg-cover min-h-50-screen rounded-xl see"
-            style="background-image: url('https://fastapi.tiangolo.com/img/favicon.png')">
-            <span
-                class="absolute top-0 left-0 w-full h-full bg-center bg-cover bg-gradient-to-tl from-gray-900 to-slate-800 opacity-60"></span>
-            <div class="container z-10">
-                <div class="flex flex-wrap justify-center -mx-3">
-                    <div class="w-full max-w-full px-3 mx-auto mt-0 text-center lg:flex-0 shrink-0 lg:w-5/12">
-                        <h1 class="mt-12 mb-2 text-white">Welcome!</h1>
-                        <p class="text-white"> TechScrape - Tech News at your Fingertips - </p>
-                    </div>
-                </div>
-            </div>
-        </div> -->
+    <section class="flex items-center justify-center min-h-screen">
+
         <div class="container">
-            <div class="flex items-center justify-center min-h-screen ">
+            <div class="w-full max-w-full px-3 mx-auto mt-0 text-center text-black mb-4">
+                <h1 class="mt-12 mb-2">Welcome!</h1>
+                <p> TechScrape - Tech News at your Fingertips - </p>
+            </div>
+
+            <div class="">
                 <div class="w-full max-w-full px-3 mx-auto mt-0 md:flex-0 shrink-0 md:w-7/12 lg:w-5/12 xl:w-4/12">
                     <div
                         class="relative z-0 flex flex-col min-w-0 break-words bg-white border-0 shadow-soft-xl rounded-2xl bg-clip-border">

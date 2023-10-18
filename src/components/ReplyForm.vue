@@ -1,7 +1,7 @@
 <script>
 import { defineComponent } from 'vue';
 import { mapState, useStore } from 'vuex';
-import { ReplytoComment, getRepliesByCommentId } from '../utils';
+import { ReplytoComment } from '../utils';
 
 export default defineComponent({
     data() {
@@ -13,6 +13,10 @@ export default defineComponent({
     },
     computed: {
         ...mapState(['post', 'showRepliesFor']),
+        isReplyValid() {
+            const wordCount = this.content.split(" ").filter(word => word.trim() !== "").length;
+            return this.content.trim() !== "" && wordCount <= 200;
+        }
     },
 
     props: {
@@ -23,6 +27,12 @@ export default defineComponent({
             this.showReplyForm = !this.showReplyForm;
         },
         async submitReply() {
+            // Check again before processing
+            if (!this.isReplyValid) {
+                alert("Invalid reply. Ensure your reply is not blank and is less than or equal to 200 words.");
+                return;
+            }
+
             const payload = {
                 content: this.content,
                 scraped_news_id: this.post?.id,
@@ -36,7 +46,6 @@ export default defineComponent({
                     this.toggleshowReplyForm();
                     this.content = "";
                     this.$store.commit('UPDATE_COMMENTS_TRACKER');
-                    // If the parent_id exists in the showRepliesFor state, toggle its value
                     if (this.showRepliesFor[this.parent_id] !== undefined) {
                         // this.$store.commit('TOGGLE_SHOW_REPLIES', this.parent_id);
                     }
@@ -45,10 +54,10 @@ export default defineComponent({
                 console.error("Failed to submit comment:", error);
             }
         },
-
     },
 })
 </script>
+
 
 <template>
     <div class="flex items-center mt-4 space-x-4">

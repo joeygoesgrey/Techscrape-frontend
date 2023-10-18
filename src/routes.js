@@ -13,17 +13,18 @@ import StartupsVue from "./Views/Startups.vue"
 import CryptoVue from "./Views/Crypto.vue"
 
 const routes = [
-  { path: '/', component: SearchView },
-  { path: '/feeds', component: FeedsVue },
-  { path: '/feeds/AI', component: AiVue },
-  { path: '/feeds/security', component: SecurityVue },
-  { path: '/feeds/startups', component: StartupsVue },
-  { path: '/feeds/crypto', component: CryptoVue },
-  { path: '/profile', component: ProfileVue, meta: { requiresAuth: true } }, // Add a meta field for authentication check
-  { path: '/sign-in', component: SignInVue },
-  { path: '/sign-up', component: SignUpVue },
-  { path: '/feed/:slug', component: FeedDetailsVue },
+  { path: '/', component: SearchView, meta: { requiresAuth: true } },
+  { path: '/feeds', component: FeedsVue, meta: { requiresAuth: true } },
+  { path: '/feeds/AI', component: AiVue, meta: { requiresAuth: true } },
+  { path: '/feeds/security', component: SecurityVue, meta: { requiresAuth: true } },
+  { path: '/feeds/startups', component: StartupsVue, meta: { requiresAuth: true } },
+  { path: '/feeds/crypto', component: CryptoVue, meta: { requiresAuth: true } },
+  { path: '/profile', component: ProfileVue, meta: { requiresAuth: true } },
+  { path: '/sign-in', component: SignInVue }, // No requiresAuth meta tag
+  { path: '/sign-up', component: SignUpVue }, // No requiresAuth meta tag
+  { path: '/feed/:slug', component: FeedDetailsVue, meta: { requiresAuth: true } },
 ];
+
 
 const router = createRouter({
   history: createWebHistory(),

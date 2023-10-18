@@ -52,6 +52,9 @@
             </div>
         </div>
     </div>
+    <div v-else-if="loading" class="flex items-center justify-center min-h-screen">
+        <LoadingCompVue />
+    </div>
     <div v-else>
         No Recommended Articles yet We are still studying your Activity
     </div>
@@ -60,9 +63,15 @@
 <script>
 import { defineComponent, onMounted, ref } from 'vue';
 import { API_BASE_URL } from '../utils';
-
+import { mapState, useStore } from 'vuex'; // Import useStore
+import LoadingComp from '../components/LoadingComp.vue';
 export default defineComponent({
+    computed: { ...mapState(['loading']) },
+    components: {
+        LoadingComp
+    },
     setup() {
+        const store = useStore(); // Get access to the store
         // Use ref to define recommendedArticles as a reactive property
         const recommendedArticles = ref([]);
 
@@ -90,7 +99,9 @@ export default defineComponent({
 
         // Call fetchRecommendedArticles when the component is mounted
         onMounted(() => {
+            store.commit('SET_LOADING');
             fetchRecommendedArticles();
+            store.commit('SET_LOADING');
         });
 
         // Return the recommendedArticles ref

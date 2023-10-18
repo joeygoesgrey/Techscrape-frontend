@@ -11,8 +11,8 @@
                     class="px-0 w-full text-sm text-gray-900 border-0 focus:ring-0 focus:outline-none dark:text-white dark:placeholder-gray-400 dark:bg-gray-800"
                     placeholder="Write a comment..." required></textarea>
             </div>
-            <button type="submit"
-                class="cursor-pointer inline-flex  bg-gradient-to-tl from-purple-700 to-pink-500 items-center py-3 text-xs px-4 font-medium text-center rounded-lg focus:ring-1 focus:to-pink-500  dark:focus:ring-primary-900 hover:from-purple-700">
+            <button type="submit" :disabled="!isCommentValid"
+                class="cursor-pointer inline-flex bg-gradient-to-tl from-purple-700 to-pink-500 items-center py-3 text-xs px-4 font-medium text-center rounded-lg focus:ring-1 focus:to-pink-500  dark:focus:ring-primary-900 hover:from-purple-700">
                 <small class="cursor-pointer"> Comment</small>
             </button>
         </form>
@@ -77,6 +77,10 @@ export default defineComponent({
     },
     computed: {
         ...mapState(['commentsData']),
+        isCommentValid() {
+            // Check for empty spaces and word count
+            return this.user_comment.trim().length > 0 && this.user_comment.split(' ').length <= 200;
+        }
     },
     setup(props) {
         const store = useStore();
@@ -122,6 +126,11 @@ export default defineComponent({
             return moment(dateTimeStr).fromNow();
         },
         async submitComment() {
+            // Check again before processing
+            if (!this.isCommentValid) {
+                console.error("Invalid comment.");
+                return;
+            }
             const payload = {
                 content: this.user_comment,
                 scraped_news_id: this.postId,

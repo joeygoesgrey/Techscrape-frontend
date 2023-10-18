@@ -1,5 +1,8 @@
 <template>
-    <div class="w-full p-6 mx-auto">
+    <div class="flex items-center justify-center min-h-screen" v-if="loading">
+        <LoadingComp />
+    </div>
+    <div class="w-full p-6 mx-auto" v-else>
 
         <div class="-mx-3">
             <div
@@ -7,8 +10,8 @@
 
                 <div class="flex-auto p-4">
                     <div class="flex flex-wrap -mx-3">
-                        <div class="w-full max-w-full px-3 mb-6 md:w-6/12 md:flex-none xl:mb-6 xl:w-3/12"
-                            v-for="ai in AI" :key="ai.id">
+                        <div class="w-full max-w-full px-3 mb-6 md:w-6/12 md:flex-none xl:mb-6 xl:w-3/12" v-for="ai in AI"
+                            :key="ai.id">
                             <div
                                 class="relative flex flex-col min-w-0 break-words bg-transparent border-0 shadow-none rounded-2xl bg-clip-border">
                                 <div class="relative">
@@ -55,19 +58,25 @@
 import { defineComponent, onMounted } from 'vue';
 import { getPostsByCategory } from '../utils'; // Import your utility function
 import { mapState, useStore } from 'vuex'; // Import useStore
+import LoadingComp from '../components/LoadingComp.vue';
 
 export default defineComponent({
     computed: {
         ...mapState(['AI']),
+        ...mapState(['loading']),
+    },
+    components: {
+        LoadingComp
     },
     setup() {
         const store = useStore(); // Get access to the store
 
         // Use onMounted to perform actions after the component is mounted
         onMounted(async () => {
+            store.commit('SET_LOADING');
             const response = await getPostsByCategory("ai");
             store.commit('SET_AI', response.results.items);
-            console.log(store.state.AI); // Access state directly from the store
+            store.commit('SET_LOADING');
         });
     },
 });

@@ -1,5 +1,8 @@
 <template>
-    <div class="w-full p-6 mx-auto">
+    <div class="flex items-center justify-center min-h-screen" v-if="loading">
+        <LoadingComp />
+    </div>
+    <div class="w-full p-6 mx-auto" v-else>
 
         <div class="-mx-3">
             <div
@@ -53,20 +56,25 @@
 <script>
 import { defineComponent, onMounted } from 'vue';
 import { getPostsByCategory } from '../utils'; // Import your utility function
-import { mapState, useStore } from 'vuex'; // Import useStore
-
+import { mapState, useStore } from 'vuex';
+import LoadingComp from '../components/LoadingComp.vue';
 export default defineComponent({
     computed: {
         ...mapState(['crypto']),
+        ...mapState(['loading']),
+    },
+    components: {
+        LoadingComp
     },
     setup() {
         const store = useStore(); // Get access to the store
 
         // Use onMounted to perform actions after the component is mounted
         onMounted(async () => {
+            store.commit('SET_LOADING');
             const response = await getPostsByCategory("crypto");
             store.commit('SET_CRYPTO', response.results.items);
-            console.log(store.state.crypto); // Access state directly from the store
+            store.commit('SET_LOADING');
         });
     },
 });
