@@ -1,5 +1,5 @@
 import { createStore } from 'vuex';
-import { API_BASE_URL } from './utils';
+import { token, getCommentsByPostId} from './utils';
 
 export default createStore({
     state: {
@@ -9,8 +9,32 @@ export default createStore({
         AI: null,
         crypto: null,
         post: null,
+        searchPost: null,
+        token: token,
+        loading: false,
+        UserInfo: null,
+        commentsData: null,
+        repliesData: {},
+        activeCommentId: null,
+        showRepliesFor: {},
+        commentsChangeTracker: 0,
     },
     mutations: {
+        UPDATE_COMMENTS_TRACKER(state) {
+            state.commentsChangeTracker += 1;
+        },
+        TOGGLE_SHOW_REPLIES(state, replyId) {
+            state.showRepliesFor[replyId] = !state.showRepliesFor[replyId];
+        },
+        SET_COMMENTSDATA(state, args) {
+            state.commentsData = args
+        },
+        SET_USERINFO(state, args) {
+            state.UserInfo = args
+        },
+        SET_LOADING(state) {
+            state.loading = !state.loading
+        },
         TOGGLE_SIDEBAR(state) {
             state.toggleSidebar = !state.toggleSidebar;
         },
@@ -29,11 +53,23 @@ export default createStore({
         SET_POST(state, args) {
             state.post = args
         },
+        SET_STORE(state, args) {
+            state.searchPost = args
+        },
     },
-    actions: {
 
+    actions: {
+        handlerefreshCommentsDataChange({ commit, state }) {
+            const fetchComments = async (postId) => {
+                if (postId) {
+                    const response = await getCommentsByPostId(postId);
+                    commit('SET_COMMENTSDATA', response);
+                } else {
+                    console.error("Post ID is not available");
+                }
+            };
+            fetchComments(state.post.id)
+        },
     },
-    getters: {
-        // your getter methods here
-    }
+
 });

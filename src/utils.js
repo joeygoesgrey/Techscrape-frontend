@@ -1,44 +1,127 @@
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
 
-const API_BASE_URL = 'http://127.0.0.1:8000'; // Your API base URL
+const API_BASE_URL = 'http://127.0.0.1:80'; // Your API base URL
 const codeKey = import.meta.env.VITE_CODE_KEY;
 
-// Decrypt an encrypted string using AES decryption
-function decryptString(encryptedData, key = codeKey) {
-    const decrypted = CryptoJS.AES.decrypt(encryptedData, key).toString(CryptoJS.enc.Utf8);
-    return decrypted;
-}
+async function getNewAccessToken(refreshToken) {
+    try {
+        const response = await axios.post(`${API_BASE_URL}/user/refresh-token`, {
+            refresh_token: refreshToken,
+        });
 
-function encryptString(data, key = codeKey) {
-    const encrypted = CryptoJS.AES.encrypt(data, key).toString();
-    console.log(encrypted)
-    return encrypted;
-}
+        // Extract the new access token
+        const newAccessToken = response.data.access_token;
 
-const retrieveDataFromSession = (key = 'access_token', defaultValue = false) => {
-    // removeDataFromSession(key)
-    // Get the data from local storage
-    const sessionData = localStorage.getItem(key);
-    // Check if session data exists
-    if (sessionData) {
-        const data = JSON.parse(sessionData);
-        if (defaultValue) {
-            return data
-        }
-        return true
-    } else {
-        return false
+        // Return or do something with the new access token
+        return newAccessToken;
+    } catch (error) {
+        console.error('An error occurred while refreshing the token:', error);
+        // Handle the error as needed
+        return null;
     }
-};
+}
+
+
+function isTokenExpired(jwtToken) {
+    // Split the token into its parts: header, payload, signature
+    const parts = jwtToken.split('.');
+
+    // Take the payload part, and decode it from base64
+    const decoded = atob(parts[1]);
+
+    // Parse it as a JSON object
+    const payload = JSON.parse(decoded);
+
+    // Get the expiration time from the payload (it's usually named 'exp')
+    const expirationTime = payload.exp; // This is in UNIX epoch format (seconds)
+
+    // Get the current time in UNIX epoch format (seconds)
+    const currentTime = Math.floor(Date.now() / 1000); // Date.now() returns milliseconds
+
+    // Compare the current time with the expiration time
+    if (currentTime >= expirationTime) {
+        return true; // The token has expired
+    } else {
+        return false; // The token is still valid
+    }
+}
+
+
+function decrypt(ciphertext, key = codeKey) {
+    const bytes = CryptoJS.AES.decrypt(ciphertext, key);
+    const originalText = bytes.toString(CryptoJS.enc.Utf8);
+    return originalText;
+}
+
+
+async function clearAllStorages() {
+    return new Promise((resolve, reject) => {
+        try {
+            localStorage.clear();
+            sessionStorage.clear();
+            resolve("Success");
+        } catch (error) {
+            reject("An error occurred while clearing storage: " + error);
+        }
+    });
+}
+
+
+async function retrieveDataFromSession(key = 'access_token') {
+    try {
+        // Get the data from local storage
+        const encryptedSessionData = localStorage.getItem(key);
+
+        if (!encryptedSessionData) {
+            return false;
+        }
+
+        // Decrypt once and use throughout
+        const sessionData = decrypt(encryptedSessionData, codeKey);
+
+        // Check token expiration
+        if (isTokenExpired(sessionData)) {
+            const encryptedRefreshToken = localStorage.getItem('refresh_token');
+
+            if (!encryptedRefreshToken) {
+                return false;  // No refresh token available
+            }
+
+            const refreshToken = decrypt(encryptedRefreshToken, codeKey);
+
+            // Asynchronously get a new access token
+            const newAccessToken = await getNewAccessToken(refreshToken);
+
+            if (!newAccessToken) {
+                return false;  // Failed to refresh token
+            }
+
+            // Encrypt and store the new access token
+            const encryptedNewAccessToken = encrypt(newAccessToken, codeKey);
+            localStorage.setItem(key, encryptedNewAccessToken);
+
+            return newAccessToken;
+        }
+        return sessionData;
+
+    } catch (error) {
+        console.error('An error occurred:', error);
+        return false;
+    }
+}
+
+const token = await retrieveDataFromSession("access_token")
+
+function encrypt(message, key = codeKey) {
+    const ciphertext = CryptoJS.AES.encrypt(message, key);
+    return ciphertext.toString();
+}
 
 
 const storeDataInSession = (key = 'access_token', data) => {
-    localStorage.setItem(key, JSON.stringify(data));
-    // console.log(data)
+    localStorage.setItem(key, data);
 };
-
-
 const getPostsByCategory = async (category, page = 1, pageSize = 8) => {
     try {
         const url = `${API_BASE_URL}/tech/categories?category=${category}&page=${page}&page_size=${pageSize}`;
@@ -58,7 +141,6 @@ const getPostBySlug = async (slug) => {
         const url = `${API_BASE_URL}/tech/content?slug=${slug}`;
         const response = await axios.get(url);
         const apiResponse = response.data;
-        console.log(apiResponse)
         return apiResponse;
     } catch (error) {
         console.error(error);
@@ -69,7 +151,7 @@ const getPostBySlug = async (slug) => {
 
 const getCommentsByPostId = async (id) => {
     try {
-        const url = `${API_BASE_URL}/comment/get/${id}`;
+        const url = `${API_BASE_URL}/comment/get_top_level_comments/${id}`;
         const response = await axios.get(url);
         const apiResponse = response.data;
         return apiResponse;
@@ -93,9 +175,9 @@ const getSearchResults = async (query, page = 1) => {
 };
 
 
-const getRepliesByCommentId = async (id, comment_id) => {
+const getRepliesByCommentId = async (comment_id) => {
     try {
-        const url = `${API_BASE_URL}/comment/get/${id}?get_replies=${comment_id}`;
+        const url = `${API_BASE_URL}/comment/get_all_replies/${comment_id}`;
         const response = await axios.get(url);
         const apiResponse = response.data;
         return apiResponse;
@@ -107,25 +189,42 @@ const getRepliesByCommentId = async (id, comment_id) => {
 
 
 const delCommentsById = (comment_id) => {
-    const headersPromise = retrieveToken().then((token) => {
-        return {
-            Authorization: `Bearer ${token}`,
-        };
-    });
+    const headers = {
+        Authorization: `Bearer ${token}`,
+    }
 
     const url = `${API_BASE_URL}/comment/delete/${comment_id}`;
 
-    return headersPromise
-        .then((headers) => {
-            return axios.delete(url, { headers });
-        })
+    return axios.delete(url, { headers })
+
         .then((response) => {
-            const statusCode = response.status;
-            if (statusCode === 204) {
+            if (response.status === 204) {
                 // Return the integer status code
-                return statusCode;
+                return response.status;
             } else {
-                throw new Error(`Unexpected status code: ${statusCode}`);
+                throw new Error(`Unexpected status code: ${response.status}`);
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+            throw error;
+        });
+};
+
+const MakeComments = (payload) => {  // Added token as a parameter
+    const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'  // This is often required
+    };
+
+    const url = `${API_BASE_URL}/comment/add`;
+
+    return axios.post(url, payload, { headers })  // Moved headers to the third argument
+        .then((response) => {
+            if (response.status === 201) {
+                return response.status;
+            } else {
+                throw new Error(`Unexpected status code: ${response.status}`);
             }
         })
         .catch((error) => {
@@ -135,56 +234,55 @@ const delCommentsById = (comment_id) => {
 };
 
 
+
 const ReplytoComment = async (commentData) => {
-    try {
-        const headers = await retrieveToken().then((token) => {
-            return {
-                Authorization: `Bearer ${token}`,
-            };
+    const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'  // This is often required
+    };
+
+    const url = `${API_BASE_URL}/comment/add`;
+
+    return axios.post(url, commentData, { headers })  // Moved headers to the third argument
+        .then((response) => {
+            if (response.status === 201) {
+                return response.status;
+            } else {
+                throw new Error(`Unexpected status code: ${response.status}`);
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+            throw error;
         });
-
-        const url = `${API_BASE_URL}/comment/add`;
-
-        const response = await axios.post(url, commentData.expects, { headers });
-
-        if (response.status === 201) {
-            return response.status
-        } else {
-
-        }
-    } catch (error) {
-        // Handle error
-        return error
-    }
 };
 
 
 const getUserInfo = () => {
-    const headersPromise = retrieveToken().then((token) => {
-        return {
-            Authorization: `Bearer ${token}`,
-        };
-    });
+    const headers = {
+        Authorization: `Bearer ${token}`,
+    };
+
     const url = `${API_BASE_URL}/user/info`;
-    return headersPromise
-        .then((headers) => {
-            return axios.get(url, { headers });
-        })
+
+    return axios.get(url, { headers })
         .then((response) => {
             if (response.status === 200) {
                 return response.data;
             }
         })
         .catch((error) => {
-            console.log(error.response.data["detail"])
-            return error.response.data["detail"]
+            console.log(error.response ? error.response.data["detail"] : "An error occurred");
+            return error.response ? error.response.data["detail"] : "An error occurred";
         });
 }
 
 
 
+export default API_BASE_URL
 export {
     getUserInfo,
+    storeDataInSession,
     getPostBySlug,
     getSearchResults,
     getPostsByCategory,
@@ -194,7 +292,9 @@ export {
     delCommentsById,
     ReplytoComment,
     retrieveDataFromSession,
-    decryptString,
-    encryptString,
+    decrypt,
+    token,
+    encrypt,
+    MakeComments,
     axios,
 };

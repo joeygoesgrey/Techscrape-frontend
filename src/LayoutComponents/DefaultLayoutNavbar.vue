@@ -10,7 +10,6 @@
                 <div class="flex items-center md:ml-auto md:pr-4">
                     <ul class="flex flex-row justify-end pl-0 mb-0 list-none md-max:w-full">
 
-
                         <li class="flex items-center pl-4 xl:hidden">
                             <a @click="toggleSidebar()"
                                 class="block p-0 text-sm transition-all ease-nav-brand text-slate-500 mx-4">
@@ -44,22 +43,20 @@
                                         href="javascript:;">
                                         <div class="flex py-1">
                                             <div class="my-auto">
-                                                <img src="../assets/img/small-logos/logo-spotify.svg"
+                                                <img src="../assets/img/small-logos/icon-sun-cloud.png"
                                                     class="inline-flex items-center justify-center mr-4 text-sm text-white bg-gradient-to-tl from-gray-900 to-slate-800 h-9 w-9 max-w-none rounded-xl" />
                                             </div>
                                             <div class="flex flex-col justify-center">
                                                 <h6 class="mb-1 text-sm font-normal leading-normal"><span
-                                                        class="font-semibold">New album</span> by Travis Scott</h6>
+                                                        class="font-semibold">Techscrape wishes you a warm welcome </span></h6>
                                                 <p class="mb-0 text-xs leading-tight text-slate-400">
                                                     <i class="mr-1 fa fa-clock"></i>
-                                                    1 day
+                                                    now
                                                 </p>
                                             </div>
                                         </div>
                                     </a>
                                 </li>
-
-
                             </ul>
                         </li>
 
@@ -80,6 +77,9 @@ export default defineComponent({
         const store = useStore();
         const show_notification = ref(false);
         return { show_notification, store };
+    },
+    computed:{
+        
     },
     methods: {
         toggleSidebar() {
