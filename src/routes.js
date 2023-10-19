@@ -1,6 +1,6 @@
 // src/routes.js
 import { createRouter, createWebHistory } from 'vue-router';
-import token from "./utils.js";
+import initializeToken from "./utils.js";
  import SearchView from './Views/Search.vue';
 import FeedsVue from './Views/Feeds.vue';
 import ProfileVue from './Views/Profile.vue';
@@ -33,7 +33,7 @@ const router = createRouter({
 
 // Add a global navigation guard to check authentication
 router.beforeEach((to, from, next) => {
-  if (to.meta.requiresAuth && !token) {
+  if (to.meta.requiresAuth && initializeToken()) {
     // If the route requires authentication and the user is not authenticated
     next('/sign-in'); // Redirect to the sign-in page
   } else {

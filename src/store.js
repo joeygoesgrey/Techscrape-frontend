@@ -1,5 +1,5 @@
 import { createStore } from 'vuex';
-import { token, getCommentsByPostId} from './utils';
+import { getCommentsByPostId} from './utils';
 
 export default createStore({
     state: {
@@ -10,7 +10,6 @@ export default createStore({
         crypto: null,
         post: null,
         searchPost: null,
-        token: token,
         loading: false,
         UserInfo: null,
         commentsData: null,

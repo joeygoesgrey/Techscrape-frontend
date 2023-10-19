@@ -3,6 +3,7 @@ import CryptoJS from 'crypto-js';
 
 const API_BASE_URL = 'http://127.0.0.1:80'; // Your API base URL
 const codeKey = import.meta.env.VITE_CODE_KEY;
+let token;
 
 async function getNewAccessToken(refreshToken) {
     try {
@@ -111,7 +112,13 @@ async function retrieveDataFromSession(key = 'access_token') {
     }
 }
 
-const token = await retrieveDataFromSession("access_token")
+
+async function initializeToken() {
+    token = await retrieveDataFromSession("access_token");
+    return token
+}
+
+
 
 function encrypt(message, key = codeKey) {
     const ciphertext = CryptoJS.AES.encrypt(message, key);
@@ -188,7 +195,9 @@ const getRepliesByCommentId = async (comment_id) => {
 };
 
 
-const delCommentsById = (comment_id) => {
+const delCommentsById = async (comment_id) => {
+    const token = await retrieveDataFromSession("access_token")
+
     const headers = {
         Authorization: `Bearer ${token}`,
     }
@@ -211,7 +220,9 @@ const delCommentsById = (comment_id) => {
         });
 };
 
-const MakeComments = (payload) => {  // Added token as a parameter
+const MakeComments = async (payload) => {  // Added token as a parameter
+    const token = await retrieveDataFromSession("access_token")
+
     const headers = {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'  // This is often required
@@ -236,6 +247,8 @@ const MakeComments = (payload) => {  // Added token as a parameter
 
 
 const ReplytoComment = async (commentData) => {
+    const token = await retrieveDataFromSession("access_token")
+
     const headers = {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'  // This is often required
@@ -258,7 +271,9 @@ const ReplytoComment = async (commentData) => {
 };
 
 
-const getUserInfo = () => {
+const getUserInfo = async () => {  // Added token as a parameter
+    const token = await retrieveDataFromSession("access_token")
+
     const headers = {
         Authorization: `Bearer ${token}`,
     };
@@ -293,7 +308,7 @@ export {
     ReplytoComment,
     retrieveDataFromSession,
     decrypt,
-    token,
+    initializeToken,
     encrypt,
     MakeComments,
     axios,
