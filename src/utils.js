@@ -1,7 +1,7 @@
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
 
-const API_BASE_URL = 'http://127.0.0.1:80'; // Your API base URL
+const API_BASE_URL = 'https://techscrape-scrapper-api.onrender.com'; // Your API base URL
 const codeKey = import.meta.env.VITE_CODE_KEY;
 let token;
 
