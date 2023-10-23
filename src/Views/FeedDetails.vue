@@ -26,7 +26,7 @@
                     </a>
                 </div>
 
-                <CommentSection v-if="token" :postId="post?.id" />
+                <CommentSection v-if="getTokenAndRedirectIfMissing" :postId="post?.id" />
                 <div v-else class="text-center text-xl pb-4">
                     <b>
                         In order to comment on an article you have to <a href="/sign-in" class="underline">
@@ -45,7 +45,7 @@ import { defineComponent, onMounted } from 'vue';
 import Chat from '../components/Chat.vue';
 import moment from 'moment';
 import CommentSection from '../components/CommentSection.vue';
-import { getPostBySlug } from '../utils';
+import { getPostBySlug, retrieveDataFromSession } from '../utils';
 import { useStore, mapState } from 'vuex';
 import { useRoute } from 'vue-router'; // Import useRoute to access route parameters
 import LoadingCompVue from '../components/LoadingComp.vue';
@@ -56,13 +56,24 @@ export default defineComponent({
     },
     computed: {
         ...mapState(['post']),
-        ...mapState(['token']),
         ...mapState(['loading']),
     },
     methods: {
         formatDateTime(dateTimeStr) {
             return moment(dateTimeStr).fromNow();
         },
+        async getTokenAndRedirectIfMissing() {
+            const token = await this.retrieveDataFromSession("access_token");
+
+            if (!token) {
+                setTimeout(() => {
+                    window.location.href = "/sign-in";
+                }, 1000);
+            }
+
+            return token;
+        },
+
     },
     setup() {
         const store = useStore();

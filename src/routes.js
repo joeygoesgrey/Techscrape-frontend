@@ -1,6 +1,6 @@
 // src/routes.js
 import { createRouter, createWebHistory } from 'vue-router';
-import initializeToken from "./utils.js";
+import getTokenAndRedirectIfMissing from "./utils.js";
  import SearchView from './Views/Search.vue';
 import FeedsVue from './Views/Feeds.vue';
 import ProfileVue from './Views/Profile.vue';
@@ -20,8 +20,8 @@ const routes = [
   { path: '/feeds/startups', component: StartupsVue, meta: { requiresAuth: true } },
   { path: '/feeds/crypto', component: CryptoVue, meta: { requiresAuth: true } },
   { path: '/profile', component: ProfileVue, meta: { requiresAuth: true } },
-  { path: '/sign-in', component: SignInVue }, // No requiresAuth meta tag
-  { path: '/sign-up', component: SignUpVue }, // No requiresAuth meta tag
+  { path: '/sign-in', component: SignInVue },
+  { path: '/sign-up', component: SignUpVue }, 
   { path: '/feed/:slug', component: FeedDetailsVue, meta: { requiresAuth: true } },
 ];
 
@@ -33,7 +33,7 @@ const router = createRouter({
 
 // Add a global navigation guard to check authentication
 router.beforeEach((to, from, next) => {
-  if (to.meta.requiresAuth && initializeToken()) {
+  if (to.meta.requiresAuth && getTokenAndRedirectIfMissing()) {
     // If the route requires authentication and the user is not authenticated
     next('/sign-in'); // Redirect to the sign-in page
   } else {

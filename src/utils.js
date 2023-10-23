@@ -2,9 +2,7 @@ import axios from 'axios';
 import CryptoJS from 'crypto-js';
 
 const API_BASE_URL = 'https://techscrape-scrapper-api.onrender.com'; // Your API base URL
-const codeKey = import.meta.env.VITE_CODE_KEY;
-let token;
-
+const codeKey = import.meta.env.VITE_CODE_KEY; 
 async function getNewAccessToken(refreshToken) {
     try {
         const response = await axios.post(`${API_BASE_URL}/user/refresh-token`, {
@@ -22,7 +20,6 @@ async function getNewAccessToken(refreshToken) {
         return null;
     }
 }
-
 
 function isTokenExpired(jwtToken) {
     // Split the token into its parts: header, payload, signature
@@ -48,13 +45,11 @@ function isTokenExpired(jwtToken) {
     }
 }
 
-
 function decrypt(ciphertext, key = codeKey) {
     const bytes = CryptoJS.AES.decrypt(ciphertext, key);
     const originalText = bytes.toString(CryptoJS.enc.Utf8);
     return originalText;
 }
-
 
 async function clearAllStorages() {
     return new Promise((resolve, reject) => {
@@ -67,7 +62,6 @@ async function clearAllStorages() {
         }
     });
 }
-
 
 async function retrieveDataFromSession(key = 'access_token') {
     try {
@@ -112,12 +106,19 @@ async function retrieveDataFromSession(key = 'access_token') {
     }
 }
 
+async function getTokenAndRedirectIfMissing() {
+    const token = await retrieveDataFromSession("access_token");
 
-async function initializeToken() {
-    token = await retrieveDataFromSession("access_token");
-    return token
+    if (!token) {
+        setTimeout(() => {
+            window.location.href = "/sign-in";
+        }, 1000);
+    }
+
+    return token;
 }
 
+ 
 
 
 function encrypt(message, key = codeKey) {
@@ -194,7 +195,7 @@ const getRepliesByCommentId = async (comment_id) => {
     }
 };
 
-
+// Auth based
 const delCommentsById = async (comment_id) => {
     const token = await retrieveDataFromSession("access_token")
 
@@ -243,8 +244,6 @@ const MakeComments = async (payload) => {  // Added token as a parameter
             throw error;
         });
 };
-
-
 
 const ReplytoComment = async (commentData) => {
     const token = await retrieveDataFromSession("access_token")
@@ -308,7 +307,7 @@ export {
     ReplytoComment,
     retrieveDataFromSession,
     decrypt,
-    initializeToken,
+    getTokenAndRedirectIfMissing,
     encrypt,
     MakeComments,
     axios,
