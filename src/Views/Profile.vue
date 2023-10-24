@@ -16,7 +16,7 @@
                         <div
                             class="text-base ease-soft-in-out h-18.5 w-18.5 relative inline-flex items-center justify-center rounded-xl text-white transition-all duration-200">
                             <img :src="`${API_BASE_URL}/${UserInfo?.picture}`" alt="profile_image"
-                                class="w-full shadow-soft-sm rounded-xl" />
+                                class="w-full shadow-soft-sm rounded-xl" loading="lazy" />
 
                         </div>
                     </div>

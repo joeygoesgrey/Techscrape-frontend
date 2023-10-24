@@ -48,8 +48,7 @@
 
                                 <div class="text-center">
                                     <button type="submit"
-                                        class="inline-block w-full px-6 py-3 mt-6 mb-2 font-bold text-center text-white uppercase align-middle transition-all bg-transparent border-0 rounded-lg cursor-pointer active:opacity-85 hover:scale-102 hover:shadow-soft-xs leading-pro text-xs ease-soft-in tracking-tight-soft shadow-soft-md bg-150 bg-x-25 bg-gradient-to-tl from-gray-900 to-slate-800 hover:border-slate-700 hover:bg-slate-700 hover:text-white">Sign
-                                        up</button>
+                                        class="inline-block w-full px-6 py-3 mt-6 mb-2 font-bold text-center text-white uppercase align-middle transition-all bg-transparent border-0 rounded-lg cursor-pointer active:opacity-85 hover:scale-102 hover:shadow-soft-xs leading-pro text-xs ease-soft-in tracking-tight-soft shadow-soft-md bg-150 bg-x-25 bg-gradient-to-tl from-gray-900 to-slate-800 hover:border-slate-700 hover:bg-slate-700 hover:text-white">{{ Loading ? 'Verifying...' : 'Sign up' }}</button>
                                 </div>
                                 <p class="mt-4 mb-0 leading-normal text-sm">Already have an account? <a href="/sign-in"
                                         class="font-bold text-slate-700">Sign in</a></p>
@@ -74,12 +73,12 @@ export default defineComponent({
             password: '',
             confirmPassword: '',
             errorMessage: "",
+            Loading: false,
         };
     },
     methods: {
         async validateForm() {
-            // Clear any previous error messages
-            alert("i am being called ")
+
             this.errorMessage = "";
 
             if (!this.email || !this.password || !this.confirmPassword) {
@@ -96,7 +95,7 @@ export default defineComponent({
                 this.errorMessage = 'Invalid email address.';
                 return;
             }
-
+            this.Loading = true;
             try {
                 const response = await axios.post(`${API_BASE_URL}/user/signup/demo`, {
                     email: this.email,
@@ -119,6 +118,7 @@ export default defineComponent({
                     this.errorMessage = 'An error occurred while signing up. Please try again later.';
                 }
             }
+            this.Loading = false;
         },
 
 

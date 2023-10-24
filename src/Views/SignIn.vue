@@ -45,7 +45,7 @@
                                             class="focus:shadow-soft-primary-outline text-sm leading-5.6 ease-soft block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 transition-all focus:border-fuchsia-300 focus:outline-none focus:transition-shadow"
                                             placeholder="Email" aria-label="Email" aria-describedby="email-addon" />
                                     </div>
-                                    <label class="mb-2 ml-1 font-bold text-xs text-slate-700">Password</label>z
+                                    <label class="mb-2 ml-1 font-bold text-xs text-slate-700">Password</label>
                                     <div class="mb-4">
                                         <input type="password" v-model="password"
                                             class="focus:shadow-soft-primary-outline text-sm leading-5.6 ease-soft block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-2 font-normal text-gray-700 transition-all focus:border-fuchsia-300 focus:outline-none focus:transition-shadow"
@@ -122,7 +122,7 @@ export default defineComponent({
                 this.errorMessage = 'Invalid email address.';
                 return;
             }
-
+            this.store.commit('SET_LOADING');
             try {
                 const response = await axios.post(`${API_BASE_URL}/user/login`, {
                     username: this.email,
@@ -133,26 +133,19 @@ export default defineComponent({
                     }
                 });
 
-                this.store.commit('SET_LOADING');
-                console.log(response.data)
                 storeDataInSession("access_token", encrypt(response.data.access_token))
                 storeDataInSession("refresh_token", encrypt(response.data.refresh_token))
-                // console.log(re_access_token, re_refresh_token)
                 this.$router.push('/');
-
             } catch (error) {
                 if (error.response) { // Check if response is available
                     if (error.response.status === 422 || error.response.status === 403) {
                         // Handle the case where the email already exists
                         this.errorMessage = 'Invalid Credentials';
-                        // Clear password and confirm password fields
-                        this.password = '';
-                        this.confirmPassword = '';
-                        this.store.commit('SET_LOADING');
+                        this.password = ''; // Clear password field
                     } else {
                         // Handle other API request errors
                         console.error('API request error:', error);
-                        this.errorMessage = 'An error occurred while signing up. Please try again later.';
+                        this.errorMessage = 'An error occurred while signing in. Please try again later.';
                     }
                 } else {
                     // Handle cases where the request never made it to the server
@@ -160,7 +153,9 @@ export default defineComponent({
                     this.errorMessage = 'An error occurred while trying to reach the server. Please try again later.';
                 }
             }
-        },
+            this.store.commit('SET_LOADING');
+        }
+        ,
         copyToClipboard(value) {
             const el = document.createElement('textarea');  // Create a <textarea> element
             el.value = value;  // Set its value to what we want to copy

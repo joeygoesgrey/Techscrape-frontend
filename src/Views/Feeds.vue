@@ -1,5 +1,11 @@
 <template>
-    <div class="w-full p-6 mx-auto" v-if="recommendedArticles">
+    <div v-if="loading" class="flex items-center justify-center min-h-screen">
+        <LoadingComp />
+    </div>
+    <div v-else-if="recommendedArticles.length < 1" class="px-6 pt-6">
+        No Recommended Articles yet We are still studying your Activity
+    </div>
+    <div class="w-full p-6 mx-auto" v-else>
         <strong class="text-2xl ">
             Recommended Articles Based on Your Activity
         </strong>
@@ -40,7 +46,7 @@
                                             <a class="relative z-20 inline-flex items-center justify-center w-6 h-6 text-white transition-all duration-200 border-2 border-white border-solid ease-soft-in-out text-xs rounded-circle hover:z-30"
                                                 data-target="tooltip_trigger" data-placement="bottom">
                                                 <img class="w-full rounded-circle" alt="Image placeholder"
-                                                    src="../../public/download.jpeg" />
+                                                    src="/download.jpeg" />
                                             </a>
                                         </div>
                                     </div>
@@ -52,12 +58,6 @@
             </div>
         </div>
     </div>
-    <div v-else-if="loading" class="flex items-center justify-center min-h-screen">
-        <LoadingCompVue />
-    </div>
-    <div v-else>
-        No Recommended Articles yet We are still studying your Activity
-    </div>
 </template>
 
 <script>
@@ -66,7 +66,9 @@ import { API_BASE_URL } from '../utils';
 import { mapState, useStore } from 'vuex'; // Import useStore
 import LoadingComp from '../components/LoadingComp.vue';
 export default defineComponent({
-    computed: { ...mapState(['loading']) },
+    computed: {
+        ...mapState(['loading'])
+    },
     components: {
         LoadingComp
     },
@@ -75,8 +77,10 @@ export default defineComponent({
         // Use ref to define recommendedArticles as a reactive property
         const recommendedArticles = ref([]);
 
-        // Define the fetchRecommendedArticles method
         const fetchRecommendedArticles = () => {
+            // Set loading state to true at the start of the API request
+            store.commit('SET_LOADING', true);
+
             // Replace with the actual URL of your FastAPI endpoint
             const apiUrl = `${API_BASE_URL}/tech/recommendations`;
 
@@ -94,14 +98,17 @@ export default defineComponent({
                 })
                 .catch((error) => {
                     console.error('Error:', error);
+                })
+                .finally(() => {
+                    // Set loading state back to false once the API call is complete
+                    store.commit('SET_LOADING', false);
                 });
         };
 
+
         // Call fetchRecommendedArticles when the component is mounted
         onMounted(() => {
-            store.commit('SET_LOADING');
             fetchRecommendedArticles();
-            store.commit('SET_LOADING');
         });
 
         // Return the recommendedArticles ref

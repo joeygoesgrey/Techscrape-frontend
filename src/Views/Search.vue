@@ -45,7 +45,6 @@ export default {
 
                 // Handle API response here, you can set it to searchResults
                 this.searchPost = response?.data;
-                console.log(this.searchPost)
             } catch (error) {
                 // Handle errors
                 console.error('Error making API request:', error);
@@ -121,7 +120,7 @@ export default {
                                                 <a class="relative z-20 inline-flex items-center justify-center w-6 h-6 text-white transition-all duration-200 border-2 border-white border-solid ease-soft-in-out text-xs rounded-circle hover:z-30"
                                                     data-target="tooltip_trigger" data-placement="bottom">
                                                     <img class="w-full rounded-circle" alt="Image placeholder"
-                                                        src="../../public/download.jpeg" />
+                                                        src="/download.jpeg" />
                                                 </a>
                                             </div>
                                         </div>

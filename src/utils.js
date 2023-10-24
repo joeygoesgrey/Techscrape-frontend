@@ -286,7 +286,6 @@ const getUserInfo = async () => {  // Added token as a parameter
             }
         })
         .catch((error) => {
-            console.log(error.response ? error.response.data["detail"] : "An error occurred");
             return error.response ? error.response.data["detail"] : "An error occurred";
         });
 }
@@ -311,4 +310,5 @@ export {
     encrypt,
     MakeComments,
     axios,
+    clearAllStorages,
 };
